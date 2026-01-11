@@ -38,18 +38,22 @@ class TaskTwoTests {
         // Simulate Kafka delivering each transaction
         int transactionNumber = 1;
         for (String transactionLine : transactionLines) {
-            // Parse JSON to Transaction object
-            Transaction transaction = parseTransaction(transactionLine);
+            // Parse transaction data: "senderId, recipientId, amount"
+            String[] parts = transactionLine.split(", ");
+            long senderId = Long.parseLong(parts[0]);
+            long recipientId = Long.parseLong(parts[1]);
+            float amount = Float.parseFloat(parts[2]);
+
+            Transaction transaction = new Transaction(senderId, recipientId, amount);
 
             logger.info("");
             logger.info(">>> TRANSACTION {} INCOMING <<<", transactionNumber);
-            logger.info("JSON: {}", transactionLine);
+            logger.info("Data: senderId={}, recipientId={}, amount={}", senderId, recipientId, amount);
 
             // Simulate Kafka listener receiving the message
             transactionListener.listen(transaction);
 
             // Record the amount
-            float amount = transaction.getAmount();
             amounts.add(amount);
             logger.info(">>> AMOUNT RECORDED: {} <<<", amount);
 
@@ -72,42 +76,5 @@ class TaskTwoTests {
         logger.info("  3. " + amounts.get(2));
         logger.info("  4. " + amounts.get(3));
         logger.info("==================================================");
-    }
-
-    /**
-     * Simple JSON parser to convert JSON string to Transaction object
-     * Handles format: {"senderId": X, "recipientId": Y, "amount": Z}
-     */
-    private Transaction parseTransaction(String json) {
-        // Remove braces
-        json = json.replace("{", "").replace("}", "").trim();
-
-        long senderId = 0;
-        long recipientId = 0;
-        float amount = 0;
-
-        // Split by comma and parse key-value pairs
-        String[] pairs = json.split(",");
-        for (String pair : pairs) {
-            String[] keyValue = pair.split(":");
-            if (keyValue.length == 2) {
-                String key = keyValue[0].trim().replaceAll("\"", "");
-                String value = keyValue[1].trim().replaceAll("\"", "");
-
-                switch (key) {
-                    case "senderId":
-                        senderId = Long.parseLong(value);
-                        break;
-                    case "recipientId":
-                        recipientId = Long.parseLong(value);
-                        break;
-                    case "amount":
-                        amount = Float.parseFloat(value);
-                        break;
-                }
-            }
-        }
-
-        return new Transaction(senderId, recipientId, amount);
     }
 }
