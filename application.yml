@@ -14,6 +14,9 @@ spring:
             value:
               default:
                 type: com.jpmc.midascore.foundation.Transaction
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
   jpa:
     hibernate:
@@ -31,8 +34,7 @@ spring:
       enabled: true
 
 server:
-  port: 8080
+  port: 33400
 
-logging:
-  level:
-    com.jpmc.midascore: DEBUG
+general:
+  kafka-topic: transactions
