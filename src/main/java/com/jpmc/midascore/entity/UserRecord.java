@@ -1,6 +1,7 @@
 package com.jpmc.midascore.entity;
 
 import jakarta.persistence.*;
+import java.util.Set;
 
 @Entity
 @Table(name = "user_records")
@@ -14,6 +15,12 @@ public class UserRecord {
 
     @Column(nullable = false)
     private float balance;
+
+    @OneToMany(mappedBy = "sender")
+    private Set<TransactionRecord> sentTransactions;
+
+    @OneToMany(mappedBy = "recipient")
+    private Set<TransactionRecord> receivedTransactions;
 
     protected UserRecord() {
     }
@@ -52,5 +59,13 @@ public class UserRecord {
 
     public void setBalance(double balance) {
         this.balance = (float) balance;
+    }
+
+    public Set<TransactionRecord> getSentTransactions() {
+        return sentTransactions;
+    }
+
+    public Set<TransactionRecord> getReceivedTransactions() {
+        return receivedTransactions;
     }
 }

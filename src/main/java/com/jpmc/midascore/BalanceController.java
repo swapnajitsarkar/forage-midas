@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Optional;
-
 @RestController
 @RequestMapping("/balance")
 @Slf4j
@@ -23,10 +21,10 @@ public class BalanceController {
     @GetMapping
     public Balance getBalance(@RequestParam Long userId) {
         log.info("Balance query for user: {}", userId);
-        Optional<UserRecord> userOpt = databaseConduit.getUserBalance(userId);
+        UserRecord user = databaseConduit.getUserBalance(userId);
 
-        if (userOpt.isPresent()) {
-            return new Balance(userOpt.get().getBalance());
+        if (user != null) {
+            return new Balance(user.getBalance());
         }
 
         return new Balance(0f);
