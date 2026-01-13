@@ -1,8 +1,8 @@
 package com.jpmc.midascore;
 
-import com.jpmc.midascore.component.DatabaseConduit;
 import com.jpmc.midascore.entity.UserRecord;
 import com.jpmc.midascore.foundation.Balance;
+import com.jpmc.midascore.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,17 +16,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class BalanceController {
 
     @Autowired
-    private DatabaseConduit databaseConduit;
+    private UserRepository userRepository;
 
     @GetMapping
     public Balance getBalance(@RequestParam Long userId) {
         log.info("Balance query for user: {}", userId);
-        UserRecord user = databaseConduit.getUserBalance(userId);
 
-        if (user != null) {
-            return new Balance(user.getBalance());
-        }
-
-        return new Balance(0f);
+        return userRepository.findById(userId)
+                .map(user -> new Balance(user.getBalance()))
+                .orElse(new Balance(0f));
     }
 }

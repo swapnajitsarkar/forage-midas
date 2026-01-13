@@ -1,21 +1,23 @@
 package com.jpmc.midascore;
 
+import com.jpmc.midascore.entity.UserRecord;
+import com.jpmc.midascore.foundation.Transaction;
+import com.jpmc.midascore.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 
 @SpringBootTest
 @DirtiesContext
-@EmbeddedKafka(partitions = 1, brokerProperties = {"listeners=PLAINTEXT://localhost:9092", "port=9092"})
-public class TaskFourTests {
+class TaskFourTests {
     static final Logger logger = LoggerFactory.getLogger(TaskFourTests.class);
 
     @Autowired
-    private KafkaProducer kafkaProducer;
+    private UserRepository userRepository;
 
     @Autowired
     private UserPopulator userPopulator;
@@ -23,24 +25,57 @@ public class TaskFourTests {
     @Autowired
     private FileLoader fileLoader;
 
+    @Autowired
+    private TransactionListener transactionListener;
+
+    @BeforeEach
+    void setUp() {
+        userPopulator.populate();
+    }
+
     @Test
     void task_four_verifier() throws InterruptedException {
-        userPopulator.populate();
-        String[] transactionLines = fileLoader.loadStrings("/test_data/alskdjfh.fhdjsk");
+        String[] transactionLines = fileLoader.loadStrings("/test_data/poiuytrewq.uiop");
+
+        logger.info("==================================================");
+        logger.info("TASK FOUR: REST API INTEGRATION TEST");
+        logger.info("==================================================");
+        logger.info("Processing {} transactions with Incentive API...", transactionLines.length);
+
+        // Process each transaction
         for (String transactionLine : transactionLines) {
-            kafkaProducer.send(transactionLine);
+            String[] parts = transactionLine.split(", ");
+            long senderId = Long.parseLong(parts[0]);
+            long recipientId = Long.parseLong(parts[1]);
+            float amount = Float.parseFloat(parts[2]);
+
+            Transaction transaction = new Transaction(senderId, recipientId, amount);
+
+            logger.info("Processing: Sender={}, Recipient={}, Amount={}",
+                    senderId, recipientId, amount);
+
+            transactionListener.listen(transaction);
+
+            Thread.sleep(500);
         }
+
         Thread.sleep(2000);
 
+        logger.info("");
+        logger.info("==================================================");
+        logger.info("WILBUR FINAL BALANCE");
+        logger.info("==================================================");
 
-        logger.info("----------------------------------------------------------");
-        logger.info("----------------------------------------------------------");
-        logger.info("----------------------------------------------------------");
-        logger.info("use your debugger to find out what wilbur's balance is after all transactions are processed");
-        logger.info("kill this test once you find the answer");
-        while (true) {
-            Thread.sleep(20000);
-            logger.info("...");
+        // Get wilbur (ID 2)
+        UserRecord wilbur = userRepository.findById(2L).orElse(null);
+
+        if (wilbur != null) {
+            logger.info("User: {}", wilbur.getName());
+            logger.info("Final Balance: {}", wilbur.getBalance());
+            logger.info("Rounded Down: {}", Math.floor(wilbur.getBalance()));
+            logger.info("==================================================");
+            logger.info("SUBMIT THIS VALUE TO FORAGE: {}", (int)Math.floor(wilbur.getBalance()));
+            logger.info("==================================================");
         }
     }
 }

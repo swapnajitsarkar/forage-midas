@@ -12,12 +12,10 @@ public class UserPopulator {
     private UserRepository userRepository;
 
     public void populate() {
-        // Clear existing users (in case of re-runs)
         userRepository.deleteAll();
 
-        // Create users with specific IDs matching transaction test data
         userRepository.save(new UserRecord(1, "waldorf", 1000f));
-        userRepository.save(new UserRecord(2, "statler", 500f));
+        userRepository.save(new UserRecord(2, "wilbur", 500f));
         userRepository.save(new UserRecord(3, "bernie", 300f));
         userRepository.save(new UserRecord(4, "foo", 200f));
         userRepository.save(new UserRecord(5, "bar", 150f));

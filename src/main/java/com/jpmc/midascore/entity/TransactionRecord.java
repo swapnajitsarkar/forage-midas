@@ -21,6 +21,9 @@ public class TransactionRecord {
     @Column(nullable = false)
     private float amount;
 
+    @OneToOne(mappedBy = "transaction", cascade = CascadeType.ALL)
+    private Incentive incentive;
+
     protected TransactionRecord() {
     }
 
@@ -44,5 +47,13 @@ public class TransactionRecord {
 
     public float getAmount() {
         return amount;
+    }
+
+    public Incentive getIncentive() {
+        return incentive;
+    }
+
+    public void setIncentive(Incentive incentive) {
+        this.incentive = incentive;
     }
 }

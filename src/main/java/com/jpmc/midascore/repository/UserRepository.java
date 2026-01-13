@@ -6,5 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserRepository extends CrudRepository<UserRecord, Long> {
-    UserRecord findById(long id);
+    // CrudRepository.findById() returns Optional<UserRecord>
+    // Don't override it with a custom method that returns UserRecord directly
 }
